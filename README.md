@@ -5,7 +5,7 @@ What's working now:
 
 1- In main, gets shortcut story details from the provided Story ID.  
 2- Runs the story through standard GPT 3.5 (no onna training) with the defined prompt.  
-3- Posts that in confluence in the 'Feature Doc' space.
+3- Posts that in confluence in the 'Feature Doc' space.   
 4- Adds a comment in both shortcut & confluence with a link to each other
 
 
