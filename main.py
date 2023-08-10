@@ -30,6 +30,7 @@ if __name__ == '__main__':
     sc_api_key = os.environ['SHORTCUT_TOKEN']
     story = Shortcut(sc_api_key)
     # Get story details
+    # Shortcut's Story ID goes here
     story.get_story(22)
     print(f'Does it need docs: {story.is_doc_needed()}')
     if story.is_doc_needed():

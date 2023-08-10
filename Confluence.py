@@ -17,7 +17,7 @@ class Confluence:
         Creates a basic page in Confluence using the title & body provided
         """
         data = {'type': 'page', 'title': '[DRAFT] ' + title,
-                'space': {'key': 'SC'},
+                'space': {'key': 'FeatureDoc'},
                 'body': {'storage': {'value': body, 'representation':
                     'storage'}}}
         try:
