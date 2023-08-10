@@ -6,7 +6,7 @@ from Shortcut import Shortcut
 from ContentGenerator import ContentGenerator
 
 
-def write_draft(subject_matter, title, details):
+def write_draft(story, subject_matter, title, details):
     """
     Uses ContentGenerator class to ask the GPT endpoint.
     Uses Confluence class to post to confluence.
@@ -25,7 +25,7 @@ def write_draft(subject_matter, title, details):
     story.add_link_to_comment(story.id, docs.post_link)
 
 
-if __name__ == '__main__':
+def main():
     _ = load_dotenv(find_dotenv())  # read local .env file
     sc_api_key = os.environ['SHORTCUT_TOKEN']
     story = Shortcut(sc_api_key)
@@ -35,4 +35,4 @@ if __name__ == '__main__':
     print(f'Does it need docs: {story.is_doc_needed()}')
     if story.is_doc_needed():
         domain = story.get_content_labels()[0]["name"]
-        write_draft(domain, story.title, story.body)
+        write_draft(story, domain, story.title, story.body)

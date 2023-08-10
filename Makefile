@@ -1,2 +1,2 @@
 run_app:
-	uvicorn main:app --reload
+	venv/bin/uvicorn app:app --reload --log-level debug
