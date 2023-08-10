@@ -12,6 +12,7 @@ What's working now:
 Improvements:
 
 - Instead of getting the story manually, get it using a webhook, cronjob or something similar
+- Maybe we can use a better prompt and/or tweak the constants for better response?
 - Maybe we can use an LLM model we train for ourselves? So we could use onna-specific user stories
 - Currently using requests, maybe the code can be cleaner
 - ?
