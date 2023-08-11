@@ -24,7 +24,7 @@ class ConfluenceClient(BaseClient):
         """
         Creates a basic page in Confluence using the title & body provided
         """
-        time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")
+        time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         data = {
             "type": "page",
             "title": f"[DRAFT - {time}-{uuid.uuid4().hex[:6]}] " + title,
@@ -50,14 +50,16 @@ class ConfluenceClient(BaseClient):
         """
         data = {"title": f"{page_title}"}
         async with self.session.get(
-            f"{self.base_url}{self.api_endpoint}", json=data, headers=self.headers
+            f"{self.base_url}{self.api_endpoint}/{post_id}",
+            json=data,
+            headers=self.headers,
         ) as response:
-            json_data = await response.json()
+            page = await response.json()
 
-        parent_page, post_link = self.get_parent_page(post_id, json_data["results"])
+        post_link = self.base_url + page["_links"]["webui"]
         comment_data = {
             "type": "comment",
-            "container": parent_page,
+            "container": page,
             "body": {
                 "storage": {
                     "value": f'<a href="{url}">Link to story</a>',
@@ -74,15 +76,3 @@ class ConfluenceClient(BaseClient):
                 print("SC link added to confluence page")
 
         return post_link
-
-    def get_parent_page(self, post_id, pages):
-        """
-        :return: Container with the page that matches post_id
-        """
-        found_page = None
-        for page in pages:
-            if page.get("id") == post_id:
-                found_page = page
-                break
-
-        return found_page, self.base_url + found_page["_links"]["webui"]
