@@ -1,16 +1,19 @@
 import asyncio
+from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import Any, Dict, List, Optional
-from main import main
+
+from user_doc.main import main
 
 app = FastAPI()
+
 
 class Action(BaseModel):
     # We don't really care about the other properties here, so they aren't defined, they'll just get ingored
     id: int
     changes: Optional[Dict[str, Any]] = {}
+
 
 class WebhookRequest(BaseModel):
     actions: List[Action] = []
@@ -40,11 +43,16 @@ Example request
 }
 """
 
+
 @app.post("/webhook")
 async def webhook(body: WebhookRequest):
     # This could be a list of actions, like if you moved multiple stories to complete at the same time
     semaphore = asyncio.Semaphore(5)
 
-    tasks = [main(story_id=action.id, semaphore=semaphore) for action in body.actions if action.changes.get("completed", {}).get("new")]
+    tasks = [
+        main(story_id=action.id, semaphore=semaphore)
+        for action in body.actions
+        if action.changes.get("completed", {}).get("new")
+    ]
 
     await asyncio.gather(*tasks)

@@ -1,2 +1,6 @@
 run_app:
-	venv/bin/uvicorn app:app --reload --log-level debug
+	venv/bin/uvicorn user_doc.app:app --reload --log-level debug
+
+format:
+	isort user_doc
+	black user_doc
