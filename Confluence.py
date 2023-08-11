@@ -1,6 +1,7 @@
 import json
 
 import requests
+import uuid
 
 
 class Confluence:
@@ -16,7 +17,7 @@ class Confluence:
         """
         Creates a basic page in Confluence using the title & body provided
         """
-        data = {'type': 'page', 'title': '[DRAFT] ' + title,
+        data = {'type': 'page', 'title': f'[DRAFT - {uuid.uuid4().hex[:-5]}] ' + title,
                 'space': {'key': 'FeatureDoc'},
                 'body': {'storage': {'value': body, 'representation':
                     'storage'}}}

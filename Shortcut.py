@@ -32,7 +32,10 @@ class Shortcut:
         self.link = story['app_url']
         self.body = story['description']
         self.labels = story['labels']
-        self.owner = self.get_member(story['owner_ids'][0])
+
+        if len(story["owner_ids"]) > 0:
+            self.owner = self.get_member(story['owner_ids'][0])
+
         print(self.title)
 
     def add_link_to_comment(self, story_id, link, message="LLM generated docs"):
