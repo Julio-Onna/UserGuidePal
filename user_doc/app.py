@@ -7,9 +7,9 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from starlette.requests import Request
 
-from user_doc.confluence import Confluence
+from user_doc.confluence import ConfluenceClient
 from user_doc.content_generator import ContentGenerator
-from user_doc.shortcut import Shortcut
+from user_doc.shortcut import ShortcutClient
 from user_doc.utils import write_doc_from_story
 
 
@@ -22,9 +22,9 @@ class HTTPApplication(FastAPI):
         cf_api_key = os.environ["CONFLUENCE_TOKEN"]
         gpt_api_key = os.environ["GPT_TOKEN"]
 
-        self.story = Shortcut(sc_api_key)
+        self.shortcut_client = ShortcutClient(sc_api_key)
         self.bot = ContentGenerator(gpt_api_key)
-        self.docs = Confluence(cf_api_key)
+        self.confluence_client = ConfluenceClient(cf_api_key)
 
 
 app = HTTPApplication()
