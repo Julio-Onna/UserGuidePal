@@ -1,12 +1,17 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from main import main
 
 app = FastAPI()
 
+class Action(BaseModel):
+    # We don't really care about the other properties here, so they aren't defined, they'll just get ingored
+    id: int
+    changes: Optional[Dict[str, Any]] = {}
+
 class WebhookRequest(BaseModel):
-    actions: List[Dict[str, Any]]
+    actions: List[Action] = []
 
 
 """
@@ -35,5 +40,7 @@ Example request
 
 @app.post("/webhook")
 async def webhook(body: WebhookRequest):
-    if len(body.actions) and body.actions[0].get("changes") and body.actions[0]["changes"]["completed"]["new"]:
-        main(story_id=body.actions[0]["id"])
+    # This could be a list of actions, like if you moved multiple stories to complete at the same time
+    for action in body.actions:
+        if action.changes.get("completed", {}).get("new"):
+            main(story_id=action.id)
