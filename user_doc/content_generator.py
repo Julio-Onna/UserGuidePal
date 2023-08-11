@@ -6,7 +6,7 @@ class ContentGenerator:
         openai.api_key = key
 
     @staticmethod
-    def get_completions_response(domain, title, details):
+    async def get_completions_response(domain, title, details):
         """
         runs the prompt through OpenAI's gpt-3.5-turbo
         :return: response from ChatCompletion's endpoint
@@ -19,7 +19,7 @@ class ContentGenerator:
         )
 
         print("Sending prompt to GPT endpoint")
-        response = openai.ChatCompletion.create(
+        response = await openai.ChatCompletion.acreate(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "user", "content": prompt},

@@ -10,7 +10,9 @@ async def write_draft(request, story, subject_matter, title, details):
     Uses Confluence class to post to confluence.
     """
     # Get GPT response
-    draft = request.app.bot.get_completions_response(subject_matter, title, details)
+    draft = await request.app.bot.get_completions_response(
+        subject_matter, title, details
+    )
     # Post to confluence
     docs = request.app.confluence_client
     post_id = await docs.create_confluence_page(story.title, draft)
