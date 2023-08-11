@@ -36,4 +36,4 @@ Example request
 @app.post("/webhook")
 async def webhook(body: WebhookRequest):
     if len(body.actions) and body.actions[0].get("changes") and body.actions[0]["changes"]["completed"]["new"]:
-        main()
+        main(story_id=body.actions[0]["id"])

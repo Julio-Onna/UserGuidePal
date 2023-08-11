@@ -25,13 +25,13 @@ def write_draft(story, subject_matter, title, details):
     story.add_link_to_comment(story.id, docs.post_link)
 
 
-def main():
+def main(story_id = 22):
     _ = load_dotenv(find_dotenv())  # read local .env file
     sc_api_key = os.environ['SHORTCUT_TOKEN']
     story = Shortcut(sc_api_key)
     # Get story details
     # Shortcut's Story ID goes here
-    story.get_story(22)
+    story.get_story(story_id)
     print(f'Does it need docs: {story.is_doc_needed()}')
     if story.is_doc_needed():
         domain = story.get_content_labels()[0]["name"]
