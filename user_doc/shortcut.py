@@ -1,8 +1,9 @@
-import requests
+from user_doc.base_client import BaseClient
 
 
-class Shortcut:
+class Shortcut(BaseClient):
     def __init__(self, key):
+        super().__init__()
         self.headers = self.build_headers(key)
         self.key = key
         self.api_url_base = "https://api.app.shortcut.com/api/v3"
@@ -15,18 +16,20 @@ class Shortcut:
         self.body = ""
         self.labels = []
 
-    def get_story(self, story_id):
+    async def get_story(self, story_id):
         """
         Uses shortcut rest api to get details about a specific story
         """
         search_query = {"query": story_id, "page_size": 1}
-        try:
-            url = self.api_url_base + self.search_endpoint
-            response = requests.get(url, params=search_query, headers=self.headers)
+
+        url = self.api_url_base + self.search_endpoint
+        async with self.session.get(
+            url, params=search_query, headers=self.headers
+        ) as response:
             response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            print(e)
-        story = response.json()["data"][0]
+            json_data = await response.json()
+
+        story = json_data["data"][0]
         self.title = story["name"]
         self.id = story["id"]
         self.link = story["app_url"]
@@ -34,38 +37,33 @@ class Shortcut:
         self.labels = story["labels"]
 
         if len(story["owner_ids"]) > 0:
-            self.owner = self.get_member(story["owner_ids"][0])
+            self.owner = await self.get_member(story["owner_ids"][0])
 
         print(self.title)
 
-    def add_link_to_comment(self, story_id, link, message="LLM generated docs"):
+    async def add_link_to_comment(self, story_id, link, message="LLM generated docs"):
         """
         :param message: text in the comment
         :param link: url
         :param story_id: shortcut story id
         """
         data = {"text": f'<a href="{link}">{message}</a>'}
-        try:
-            url = self.api_url_base + f"/stories/{story_id}/comments"
-            response = requests.post(url, json=data, headers=self.headers)
+        url = self.api_url_base + f"/stories/{story_id}/comments"
+        async with self.session.post(url, json=data, headers=self.headers) as response:
             response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            print(e)
 
-    def get_member(self, member_id):
+    async def get_member(self, member_id):
         """
         Translates shortcut's member id to a name, with the idea to tag them,
         email them...
         :return: member name as string
         """
         headers = {"Content-Type": "application/json", "Shortcut-Token": self.key}
-        try:
-            url = self.api_url_base + "/members/" + member_id
-            response = requests.get(url, headers=headers)
+        url = self.api_url_base + "/members/" + member_id
+        async with self.session.get(url, headers=headers) as response:
             response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            print(e)
-        member = response.json()
+            member = await response.json()
+
         return member["profile"]["name"]
 
     def is_doc_needed(self):

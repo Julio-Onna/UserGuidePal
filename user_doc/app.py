@@ -1,12 +1,33 @@
 import asyncio
+import os
 from typing import Any, Dict, List, Optional
 
+from dotenv import find_dotenv, load_dotenv
 from fastapi import FastAPI
 from pydantic import BaseModel
+from starlette.requests import Request
 
-from user_doc.main import main
+from user_doc.confluence import Confluence
+from user_doc.content_generator import ContentGenerator
+from user_doc.shortcut import Shortcut
+from user_doc.utils import write_doc_from_story
 
-app = FastAPI()
+
+class HTTPApplication(FastAPI):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        _ = load_dotenv(find_dotenv())  # read local .env file
+        sc_api_key = os.environ["SHORTCUT_TOKEN"]
+        cf_api_key = os.environ["CONFLUENCE_TOKEN"]
+        gpt_api_key = os.environ["GPT_TOKEN"]
+
+        self.story = Shortcut(sc_api_key)
+        self.bot = ContentGenerator(gpt_api_key)
+        self.docs = Confluence(cf_api_key)
+
+
+app = HTTPApplication()
 
 
 class Action(BaseModel):
@@ -45,12 +66,12 @@ Example request
 
 
 @app.post("/webhook")
-async def webhook(body: WebhookRequest):
+async def webhook(request: Request, body: WebhookRequest):
     # This could be a list of actions, like if you moved multiple stories to complete at the same time
     semaphore = asyncio.Semaphore(5)
 
     tasks = [
-        main(story_id=action.id, semaphore=semaphore)
+        write_doc_from_story(request, story_id=action.id, semaphore=semaphore)
         for action in body.actions
         if action.changes.get("completed", {}).get("new")
     ]
