@@ -54,7 +54,7 @@ class ConfluenceClient(BaseClient):
         ) as response:
             json_data = await response.json()
 
-        parent_page = self.get_parent_page(post_id, json_data["results"])
+        parent_page, post_link = self.get_parent_page(post_id, json_data["results"])
         comment_data = {
             "type": "comment",
             "container": parent_page,
@@ -73,6 +73,8 @@ class ConfluenceClient(BaseClient):
             if response.status == 200:
                 print("SC link added to confluence page")
 
+        return post_link
+
     def get_parent_page(self, post_id, pages):
         """
         :return: Container with the page that matches post_id
@@ -83,24 +85,4 @@ class ConfluenceClient(BaseClient):
                 found_page = page
                 break
 
-        self.post_link = self.base_url + found_page["_links"]["webui"]
-        return found_page
-
-
-class Confluence:
-    def __init__(self, client):
-        self.client = client
-        self.post_id = ""
-        self.post_link = ""
-
-    async def create_confluence_page(self, title, body="<p>This is a new page</p>"):
-        """
-        Creates a basic page in Confluence using the title & body provided
-        """
-        self.post_id = await self.client.create_confluence_page(title, body)
-
-    async def add_link(self, page_title, url):
-        """
-        Adds a footer comment with a link
-        """
-        await self.client.add_link(self.post_id, page_title, url)
+        return found_page, self.base_url + found_page["_links"]["webui"]

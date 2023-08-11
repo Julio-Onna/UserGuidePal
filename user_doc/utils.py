@@ -1,7 +1,6 @@
 import asyncio
 import os
 
-from user_doc.confluence import Confluence
 from user_doc.shortcut import Shortcut
 
 
@@ -13,12 +12,12 @@ async def write_draft(request, story, subject_matter, title, details):
     # Get GPT response
     draft = request.app.bot.get_completions_response(subject_matter, title, details)
     # Post to confluence
-    docs = Confluence(request.app.confluence_client)
-    await docs.create_confluence_page(story.title, draft)
+    docs = request.app.confluence_client
+    post_id = await docs.create_confluence_page(story.title, draft)
     # Shortcut link in confluence
-    await docs.add_link(story.title, story.link)
+    post_link = await docs.add_link(post_id, story.title, story.link)
     # Confluence link in shortcut
-    await story.add_link_to_comment(story.id, docs.post_link)
+    await story.add_link_to_comment(story.id, post_link)
 
 
 async def write_doc_from_story(request, story_id=22, semaphore=asyncio.Semaphore(1)):
