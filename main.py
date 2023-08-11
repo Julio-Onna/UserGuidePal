@@ -1,4 +1,5 @@
 from dotenv import load_dotenv, find_dotenv
+import asyncio
 import os
 
 from Confluence import Confluence
@@ -25,14 +26,16 @@ def write_draft(story, subject_matter, title, details):
     story.add_link_to_comment(story.id, docs.post_link)
 
 
-def main(story_id = 22):
+async def main(story_id = 22, semaphore = asyncio.Semaphore(1)):
     _ = load_dotenv(find_dotenv())  # read local .env file
-    sc_api_key = os.environ['SHORTCUT_TOKEN']
-    story = Shortcut(sc_api_key)
-    # Get story details
-    # Shortcut's Story ID goes here
-    story.get_story(story_id)
-    print(f'Does it need docs: {story.is_doc_needed()}')
-    if story.is_doc_needed():
-        domain = story.get_content_labels()[0]["name"]
-        write_draft(story, domain, story.title, story.body)
+
+    async with semaphore:
+        sc_api_key = os.environ['SHORTCUT_TOKEN']
+        story = Shortcut(sc_api_key)
+        # Get story details
+        # Shortcut's Story ID goes here
+        story.get_story(story_id)
+        print(f'Does it need docs: {story.is_doc_needed()}')
+        if story.is_doc_needed():
+            domain = story.get_content_labels()[0]["name"]
+            write_draft(story, domain, story.title, story.body)

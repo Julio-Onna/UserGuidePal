@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Any, Dict, List, Optional
@@ -41,6 +43,8 @@ Example request
 @app.post("/webhook")
 async def webhook(body: WebhookRequest):
     # This could be a list of actions, like if you moved multiple stories to complete at the same time
-    for action in body.actions:
-        if action.changes.get("completed", {}).get("new"):
-            main(story_id=action.id)
+    semaphore = asyncio.Semaphore(5)
+
+    tasks = [main(story_id=action.id, semaphore=semaphore) for action in body.actions if action.changes.get("completed", {}).get("new")]
+
+    await asyncio.gather(*tasks)
